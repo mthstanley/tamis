@@ -48,7 +48,7 @@ class Recipe(BaseModel):
     yield_quantity: int
     yield_units: Units
     min_servings: int | None = None
-    max_serving: int | None = None
+    max_servings: int | None = None
     ingredients: list[Ingredient]
     steps: list[Step]
 
