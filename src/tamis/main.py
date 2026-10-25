@@ -3,10 +3,11 @@ from typing import Annotated
 
 import typer
 import keyring
+import httpx
 
 from tamis.extract.image import ImageExtractor
 from tamis.parse.recipe import RecipeParser
-from tamis.stockpot.client import Client
+from tamis.stockpot.client import Client, Recipe
 
 app = typer.Typer()
 
@@ -50,17 +51,42 @@ def whoami(
 
 
 @app.command()
-def sift(inputs: list[str]) -> None:
+def sift(
+    inputs: list[str],
+    api: str = "stckpt.com",
+    skip_upload: bool = False,
+    verbose: bool = False,
+) -> None:
+    token = keyring.get_password(KEYRING_SERVICE_NAME, KEYRING_USERNAME)
+    if token is None:
+        typer.echo("no logged in user found, please login first")
+        raise typer.Exit(1)
     if not all(os.path.exists(i) for i in inputs):
-        print("inputs must be valid file paths")
-        raise typer.Exit(code=1)
+        typer.echo("inputs must be valid file paths")
+        raise typer.Exit(1)
+    recipes: list[Recipe] = []
     for i in inputs:
         e = ImageExtractor()
         text = e.extract(i)
+        if verbose:
+            typer.echo(text)
         r = RecipeParser()
         extracted_data = r.parse(text)
         if extracted_data is not None:
-            print(extracted_data.model_dump_json())
+            if verbose:
+                typer.echo(extracted_data.model_dump_json(indent=2))
+            recipes.append(extracted_data)
+    stockpot = Client(api)
+
+    if not skip_upload:
+        for r in recipes:
+            try:
+                stockpot.create_recipe(r, token)
+            except httpx.HTTPStatusError as err:
+                typer.echo(
+                    f"failed to create recipe: {err.response.status_code} {err.response.json()}"
+                )
+                raise typer.Exit(1)
 
 
 if __name__ == "__main__":

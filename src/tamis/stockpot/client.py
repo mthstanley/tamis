@@ -1,5 +1,56 @@
 import httpx
 from pydantic import BaseModel
+from typing import Literal
+
+Units = Literal[
+    "teaspoons",
+    "tablespoons",
+    "fluid ounces",
+    "cups",
+    "pints",
+    "quarts",
+    "gallons",
+    "pounds",
+    "ounces",
+    "inches",
+    "grams",
+    "milliliters",
+    "liters",
+    "deciliters",
+    "sprigs",
+    "cloves",
+    "to taste",
+    "whole",
+    "small",
+    "medium",
+    "large",
+]
+
+
+class Ingredient(BaseModel):
+    ingredient: str
+    quantity: int
+    units: Units
+    preparation: str
+
+
+class Step(BaseModel):
+    ordinal: int
+    instruction: str
+
+
+class Recipe(BaseModel):
+    title: str
+    description: str | None = None
+    prep_time: int | None = None
+    cook_time: int | None = None
+    inactive_time: int | None = None
+    yield_quantity: int
+    yield_units: Units
+    min_servings: int | None = None
+    max_serving: int | None = None
+    ingredients: list[Ingredient]
+    steps: list[Step]
 
 
 class GetToken(BaseModel):
@@ -33,3 +84,11 @@ class Client:
             return False, None
         resp.raise_for_status()
         return True, GetUser.model_validate(resp.json())
+
+    def create_recipe(self, recipe: Recipe, token: str) -> None:
+        resp = httpx.post(
+            f"{self.host}/recipe",
+            headers={"Authorization": f"Bearer {token}"},
+            json=recipe.model_dump(mode="json"),
+        )
+        resp.raise_for_status()
