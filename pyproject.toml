@@ -8,7 +8,9 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "httpx>=0.28.1",
     "imutils>=0.5.4",
+    "keyring>=25.7.0",
     "ollama>=0.6.3",
     "opencv-python>=5.0.0.93",
     "pydantic>=2.13.5",
