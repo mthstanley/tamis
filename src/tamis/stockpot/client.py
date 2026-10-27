@@ -29,7 +29,7 @@ Units = Literal[
 
 class Ingredient(BaseModel):
     ingredient: str
-    quantity: int
+    quantity: float
     units: Units
     preparation: str
 
@@ -45,7 +45,7 @@ class Recipe(BaseModel):
     prep_time: int | None = None
     cook_time: int | None = None
     inactive_time: int | None = None
-    yield_quantity: int
+    yield_quantity: float
     yield_units: Units
     min_servings: int | None = None
     max_servings: int | None = None
