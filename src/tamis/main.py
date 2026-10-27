@@ -13,6 +13,7 @@ app = typer.Typer()
 
 KEYRING_SERVICE_NAME = "tamis"
 KEYRING_USERNAME = "stockpot"
+STOCKPOT_API = "https://stckpt.com/api"
 
 
 @app.callback()
@@ -26,7 +27,7 @@ def login(
     password: Annotated[
         str, typer.Option(prompt=True, confirmation_prompt=True, hide_input=True)
     ],
-    api: str = "stckpt.com",
+    api: str = STOCKPOT_API,
 ) -> None:
     stockpot = Client(api)
     token = stockpot.get_token(username, password)
@@ -36,7 +37,7 @@ def login(
 
 @app.command()
 def whoami(
-    api: str = "stckpt.com",
+    api: str = STOCKPOT_API,
 ) -> None:
     stockpot = Client(api)
     token = keyring.get_password(KEYRING_SERVICE_NAME, KEYRING_USERNAME)
@@ -53,7 +54,7 @@ def whoami(
 @app.command()
 def sift(
     inputs: list[str],
-    api: str = "stckpt.com",
+    api: str = STOCKPOT_API,
     skip_upload: bool = False,
     verbose: bool = False,
 ) -> None:
