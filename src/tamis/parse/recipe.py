@@ -5,7 +5,7 @@ from tamis.stockpot.client import Recipe, Ingredient, Step
 class RecipeParser:
     def parse(self, text: str) -> Recipe | None:
         response = ollama.chat(
-            model="llama3.2",
+            model="qwen2.5:14b",
             messages=[
                 {
                     "role": "system",
@@ -33,7 +33,7 @@ class RecipeParser:
 
                     When extracting instructions these are typically preceded
                     by bullet points or numbers or some other marker, if not
-                    present then seaprate paragraphs can be a good marker.
+                    present then separate paragraphs can be a good marker.
                     Always extract the full text from each step.
 
                     # Recipe Metadata
@@ -87,6 +87,8 @@ class RecipeParser:
                         inactive_time=5400,
                         yield_quantity=0,
                         yield_units="grams",
+                        min_servings=5,
+                        max_servings=10,
                         ingredients=[
                             Ingredient(
                                 ingredient="carrots",
@@ -113,16 +115,16 @@ class RecipeParser:
                                 preparation="",
                             ),
                             Ingredient(
-                                ingredient="butter",
-                                quantity=2,
-                                units="tablespoons",
-                                preparation="softened",
-                            ),
-                            Ingredient(
                                 ingredient="sundried tomatoes",
                                 quantity=1,
                                 units="tablespoons",
                                 preparation="minced",
+                            ),
+                            Ingredient(
+                                ingredient="butter",
+                                quantity=2,
+                                units="tablespoons",
+                                preparation="softened",
                             ),
                             Ingredient(
                                 ingredient="chicken broth",
