@@ -5,7 +5,7 @@ from tamis.stockpot.client import Recipe, Ingredient, Step
 class RecipeParser:
     def parse(self, text: str) -> Recipe | None:
         response = ollama.chat(
-            model="llama3.2",
+            model="qwen2.5:14b",
             messages=[
                 {
                     "role": "system",
