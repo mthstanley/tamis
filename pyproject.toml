@@ -16,6 +16,7 @@ dependencies = [
     "ollama>=0.6.3",
     "opencv-python>=5.0.0.93",
     "pydantic>=2.13.5",
+    "pypdf>=6.21.4",
     "pytesseract>=0.3.13",
     "typer>=0.27.2",
 ]
