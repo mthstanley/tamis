@@ -1,11 +1,22 @@
 import cv2
 import pytesseract
 from imutils import rotate_bound
+from tamis.extract import Extractor
+import os
+from urllib.parse import urlparse
 
 
-class ImageExtractor:
-    def extract(self, image_path: str) -> str:
-        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+class ImageExtractor(Extractor):
+    def can_extract(self, url: str) -> bool:
+        parsed = urlparse(url)
+        if parsed.scheme is not None or parsed.scheme != "file":
+            return False
+        if not os.path.exists(url):
+            return False
+        return cv2.imread(url) is not None
+
+    def extract(self, url: str) -> str:
+        image = cv2.imread(url, cv2.IMREAD_GRAYSCALE)
         if image is None:
             return ""
 

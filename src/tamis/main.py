@@ -5,6 +5,8 @@ import typer
 import keyring
 import httpx
 
+from tamis.extract import GeneralExtractor
+from tamis.extract.web import WebsiteExtractor
 from tamis.extract.image import ImageExtractor
 from tamis.parse.recipe import RecipeParser
 from tamis.stockpot.client import Client, Recipe
@@ -62,23 +64,24 @@ def sift(
     if token is None:
         typer.echo("no logged in user found, please login first")
         raise typer.Exit(1)
-    if not all(os.path.exists(i) for i in inputs):
-        typer.echo("inputs must be valid file paths")
+
+    extractor = GeneralExtractor([ImageExtractor(), WebsiteExtractor()])
+    if not all(extractor.can_extract(i) for i in inputs):
+        typer.echo("unable to sift recipes from given inputs")
         raise typer.Exit(1)
     recipes: list[Recipe] = []
+    recipeParser = RecipeParser()
     for i in inputs:
-        e = ImageExtractor()
-        text = e.extract(i)
+        text = extractor.extract(i)
         if verbose:
             typer.echo(text)
-        r = RecipeParser()
-        extracted_data = r.parse(text)
+        extracted_data = recipeParser.parse(text)
         if extracted_data is not None:
             if verbose:
                 typer.echo(extracted_data.model_dump_json(indent=2))
             recipes.append(extracted_data)
-    stockpot = Client(api)
 
+    stockpot = Client(api)
     if not skip_upload:
         for r in recipes:
             try:
