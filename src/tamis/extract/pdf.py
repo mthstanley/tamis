@@ -7,9 +7,7 @@ from pypdf.errors import PdfReadError
 
 class PDFExtractor(Extractor):
     def can_extract(self, url: str) -> bool:
-        print(url)
         parsed = urlparse(url)
-        print(parsed)
         if parsed.scheme != "" and parsed.scheme != "file":
             return False
         if not os.path.exists(url):
