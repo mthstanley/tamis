@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 class ImageExtractor(Extractor):
     def can_extract(self, url: str) -> bool:
         parsed = urlparse(url)
-        if parsed.scheme is not None or parsed.scheme != "file":
+        if parsed.scheme is not None and parsed.scheme != "file":
             return False
         if not os.path.exists(url):
             return False
