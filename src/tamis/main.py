@@ -1,4 +1,3 @@
-import os
 from typing import Annotated
 
 import typer
@@ -7,6 +6,7 @@ import httpx
 
 from tamis.extract import GeneralExtractor
 from tamis.extract.web import WebsiteExtractor
+from tamis.extract.pdf import PDFExtractor
 from tamis.extract.image import ImageExtractor
 from tamis.parse.recipe import RecipeParser
 from tamis.stockpot.client import Client, Recipe
@@ -65,7 +65,7 @@ def sift(
         typer.echo("no logged in user found, please login first")
         raise typer.Exit(1)
 
-    extractor = GeneralExtractor([ImageExtractor(), WebsiteExtractor()])
+    extractor = GeneralExtractor([ImageExtractor(), WebsiteExtractor(), PDFExtractor()])
     if not all(extractor.can_extract(i) for i in inputs):
         typer.echo("unable to sift recipes from given inputs")
         raise typer.Exit(1)
