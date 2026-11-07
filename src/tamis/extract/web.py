@@ -15,12 +15,17 @@ class HowToStep(BaseModel):
     text: str | None
 
 
+class HowToSection(BaseModel):
+    type_name: Literal["HowToSection"] = Field(alias="@type")
+    itemListElement: list[HowToStep]
+
+
 class Recipe(BaseModel):
     type_name: Literal["Recipe"] = Field(alias="@type")
     name: str | None = None
     cookTime: str | None = None
     recipeIngredient: list[str] | None = None
-    recipeInstructions: list[HowToStep] | None = None
+    recipeInstructions: list[HowToStep] | HowToSection | None = None
     recipeYield: list[str] | str | None = None
     prepTime: str | None = None
     totalTime: str | None = None
@@ -99,6 +104,15 @@ class WebsiteExtractor(Extractor):
             case timedelta() as t:
                 return int(t.total_seconds())
 
+    def format_recipe_instructions(self, recipe: Recipe) -> str:
+        steps = []
+        match recipe.recipeInstructions:
+            case [*items] if all(isinstance(item, HowToStep) for item in items):
+                steps = [step.text for step in items]
+            case HowToSection(itemListElement=items):
+                steps = [step.text for step in items]
+        return "\n".join([f"{i + 1}. {step}" for i, step in enumerate(steps)])
+
     def format_recipe(self, recipe: Recipe) -> str:
         prep_time = self.duration_as_seconds(recipe.prepTime)
         cook_time = self.duration_as_seconds(recipe.cookTime)
@@ -115,5 +129,5 @@ class WebsiteExtractor(Extractor):
             f"Inactive Time: {inactive_time} seconds\n"
             f"Serves: {recipe.recipeYield}\n"
             f"\n{'\n'.join(['- ' + ing for ing in recipe.recipeIngredient or []])}\n"
-            f"\n{'\n'.join([f'{i + 1}. {step.text}' for i, step in enumerate(recipe.recipeInstructions or [])])}"
+            f"\n{self.format_recipe_instructions(recipe)}"
         )
