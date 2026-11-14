@@ -53,6 +53,10 @@ class Recipe(BaseModel):
     steps: list[Step]
 
 
+class APIResponse[T](BaseModel):
+    data: T
+
+
 class GetToken(BaseModel):
     token: str
 
@@ -73,7 +77,7 @@ class Client:
         )
         resp.raise_for_status()
 
-        return GetToken.model_validate(resp.json()).token
+        return APIResponse[GetToken].model_validate(resp.json()).data.token
 
     def validate_token(self, token: str) -> tuple[bool, GetUser | None]:
         resp = httpx.get(
@@ -83,7 +87,7 @@ class Client:
         if resp.status_code == httpx.codes.UNAUTHORIZED:
             return False, None
         resp.raise_for_status()
-        return True, GetUser.model_validate(resp.json())
+        return True, APIResponse[GetUser].model_validate(resp.json()).data
 
     def create_recipe(self, recipe: Recipe, token: str) -> None:
         resp = httpx.post(
