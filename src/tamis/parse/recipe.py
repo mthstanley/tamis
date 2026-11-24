@@ -34,7 +34,8 @@ class RecipeParser:
                     When extracting instructions these are typically preceded
                     by bullet points or numbers or some other marker, if not
                     present then separate paragraphs can be a good marker.
-                    Always extract the full text from each step.
+                    Always extract the full text from each step. Step ordinals
+                    must be unique.
 
                     # Recipe Metadata
 

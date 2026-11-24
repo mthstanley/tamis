@@ -69,23 +69,23 @@ def sift(
     if not all(extractor.can_extract(i) for i in inputs):
         typer.echo("unable to sift recipes from given inputs")
         raise typer.Exit(1)
-    recipes: list[Recipe] = []
+    text = ""
     recipeParser = RecipeParser()
     for i in inputs:
-        text = extractor.extract(i)
-        if verbose:
-            typer.echo(text)
-        extracted_data = recipeParser.parse(text)
-        if extracted_data is not None:
-            if verbose:
-                typer.echo(extracted_data.model_dump_json(indent=2))
-            recipes.append(extracted_data)
+        text += extractor.extract(i)
 
-    stockpot = Client(api)
-    if not skip_upload:
-        for r in recipes:
+    if verbose:
+        typer.echo(text)
+
+    recipe = recipeParser.parse(text)
+    if recipe is not None:
+        if verbose:
+            typer.echo(recipe.model_dump_json(indent=2))
+
+        stockpot = Client(api)
+        if not skip_upload:
             try:
-                stockpot.create_recipe(r, token)
+                stockpot.create_recipe(recipe, token)
             except httpx.HTTPStatusError as err:
                 typer.echo(
                     f"failed to create recipe: {err.response.status_code} {err.response.json()}"
